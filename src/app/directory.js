@@ -39,3 +39,31 @@ class Directory {
     return true;
   }
 }
+
+class DirectoryBuilder {
+  constructor(name) {
+    this.name = name;
+    this.directories = [];
+    this.files = [];
+    this.parent = null;
+  }
+  setDirectories(directories) {
+    this.directories = directories;
+    return this;
+  }
+  setFiles(files) {
+    this.files = files;
+    return this;
+  }
+  build() {
+    let directory = new Directory();
+    directory.name = this.name;
+    directory.directories = this.directories;
+    directory.files = this.files;
+
+    for (let i = 0; i < directory.directories.length; i++) {
+      directory.directories[i].parent = directory;
+    }
+    return directory;
+  }
+}
