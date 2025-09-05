@@ -6,9 +6,11 @@ class Terminal {
 
     this.ls = new LsCommand(this.fs, this)
     this.cd = new CdCommand(this.fs, this)
+    this.clear = new ClearCommand(this.fs, this)
     this.commandMap = {
-      'ls': (args) => { return this.ls.run(args) },
-      'cd': (args) => { return this.cd.run(args) },
+      'ls':    (args) => { return this.ls.run(args) },
+      'cd':    (args) => { return this.cd.run(args) },
+      'clear': (args) => { return this.clear.run(args) },
     };
   }
 

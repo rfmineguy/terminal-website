@@ -21,10 +21,14 @@ const handlekey = (event) => {
   if (event.key === 'Backspace') term.deleteCharFromInput();
   else if (event.key === 'Enter') {
     const result = term.submitInput();
-    console.log('cmd result', result)
-    const dom = result.createDOM()
-    termOutput.appendChild(dom)
-    termArea.scrollTop = termArea.scrollHeight;
+    if (result.output_lines[0] === '<clear>') {
+      termOutput.replaceChildren();
+    }
+    else {
+      const dom = result.createDOM()
+      termOutput.appendChild(dom)
+      termArea.scrollTop = termArea.scrollHeight;
+    }
   }
   else term.addCharToInput(event.key);
 
