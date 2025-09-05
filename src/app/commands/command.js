@@ -60,3 +60,17 @@ class CommandResult {
     return result
   }
 }
+
+class AbstractCommand {
+  constructor(filesystem, terminal) {
+    if (new.target === AbstractCommand) {
+      throw new Error("Cannot instantiate abstract class 'AbstractCommand'");
+    }
+    this.filesystem = filesystem;
+    this.terminal = terminal;
+  }
+
+  run(args) {
+    throw new Error("Cannot call 'run' on absract class 'AbstractCommand'");
+  }
+}
