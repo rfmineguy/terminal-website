@@ -11,7 +11,13 @@ class CdCommand extends AbstractCommand {
     else if (args[1][0] === '/') dir = this.filesystem.getRoot().searchPath(args[1].slice(1));
     else dir = this.terminal.cwd.searchPath(args[1]);
     if (dir) {
-      this.terminal.cwd = dir;
+      if (dir instanceof Directory) {
+        this.terminal.cwd = dir;
+      }
+      else {
+        result.putOutputLine(`${args[1]} not a directory`)
+        result.code = 1
+      }
     }
     else {
       result.putOutputLine(`directory ${args[1]} does not exist`);

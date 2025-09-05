@@ -11,8 +11,18 @@ class LsCommand extends AbstractCommand {
     else if (args[1][0] === '/') dir = this.filesystem.getRoot().searchPath(args[1].slice(1));
     else dir = this.terminal.cwd.searchPath(args[1]);
     if (dir) {
-      for (let i = 0; i < dir.directories.length; i++) result.putOutputLine(`drwxr-xr-x@ Sep 4 10:00 ${dir.directories[i].name}`)
-      for (let i = 0; i < dir.files.length; i++)       result.putOutputLine(`-rw-r--r--@ Sep 4 10:00 ${dir.files[i]}`)
+      for (let i = 0; i < dir.children.length; i++) {
+        let node = dir.children[i]
+        if (node instanceof File) {
+          result.putOutputLine(`-rw-r--r--@ Sep 4 10:00 ${node.name}`)
+        }
+        else if (node instanceof Directory) {
+          result.putOutputLine(`drwxr-xr-x@ Sep 4 10:00 ${node.name}`)
+        }
+        else {
+          result.putOutputLine('entry error');
+        }
+      }
     }
     else {
       result.putOutputLine(`ls: ${args[1]}: No such file or directory`)
