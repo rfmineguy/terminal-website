@@ -3,6 +3,8 @@ class Terminal {
     this.input = "";
     this.fs = new FileSystem();
     this.cwd = this.fs.getRoot();
+    this.commandHistory = []
+    this.commandHistoryIndex = -1
 
     this.ls = new LsCommand(this.fs, this)
     this.cd = new CdCommand(this.fs, this)
@@ -24,6 +26,8 @@ class Terminal {
 
   submitInput() {
     const args = this.input.split(" ").filter(s => s.length != 0);
+    this.commandHistory.unshift(this.input)
+    this.commandHistoryIndex = -1
     this.input = "";
     if (args.length == 0) {
       return CommandResult.NoInput(this.cwd, args);
@@ -34,6 +38,21 @@ class Terminal {
     else {
       console.log('invalid command')
       return CommandResult.CommandNotFound(args[0], this.cwd, args);
+    }
+  }
+
+  navigateHistory(direction) {
+    this.commandHistoryIndex += direction
+    if (this.commandHistoryIndex <= -1)
+      this.commandHistoryIndex = -1
+    if (this.commandHistoryIndex >= this.commandHistory.length)
+      this.commandHistoryIndex = this.commandHistory.length - 1
+
+    if (this.commandHistoryIndex == -1) {
+      this.input = ''
+    }
+    else {
+      this.input = this.commandHistory[this.commandHistoryIndex];
     }
   }
 }

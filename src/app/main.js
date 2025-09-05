@@ -30,6 +30,14 @@ const handlekey = (event) => {
       termArea.scrollTop = termArea.scrollHeight;
     }
   }
+  else if (event.key == 'ArrowUp') {
+    term.navigateHistory(1)
+    event.preventDefault()
+  }
+  else if (event.key == 'ArrowDown') {
+    term.navigateHistory(-1)
+    event.preventDefault()
+  }
   else term.addCharToInput(event.key);
 
   updateline(term.input);
