@@ -17,15 +17,21 @@ class Directory {
 
   // expects dirlist to look like
   //  'folder/subfolder'  => ['folder', 'subfolder']
+  //  supports using '..' to navigate backward
   searchPath(path) {
     const list = path.split('/')
     let curr = this;
     for (let i in list) {
       if (curr === undefined) return undefined;
-      const matches = curr.directories.filter((item) => item.name === list[i])
-      if (matches.length == 0) return undefined;
-      if (matches.length > 1) console.err(`folder search found more than one folder of the same name ${list[i]}`)
-      curr = matches[0]
+      if (list[i] === "..") {
+        curr = curr.parent
+      }
+      else {
+        const matches = curr.directories.filter((item) => item.name === list[i])
+        if (matches.length == 0) return undefined;
+        if (matches.length > 1) console.err(`folder search found more than one folder of the same name ${list[i]}`)
+        curr = matches[0]
+      }
     }
     return curr;
   }

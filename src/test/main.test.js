@@ -137,7 +137,7 @@ QUnit.module('filesystem', function() {
       QUnit.assert.equal(dir.name, 'subempty')
       QUnit.assert.deepEqual(dir.directories, [])
       QUnit.assert.deepEqual(dir.files, ['notemptysike.md'])
-    })
+    });
     QUnit.test('compound_path_not_exists', function() {
       var root = new DirectoryBuilder('/').setDirectories([
         new DirectoryBuilder('home').setDirectories([
@@ -166,8 +166,36 @@ QUnit.module('filesystem', function() {
       var dir = root.searchPath('subempty')
       QUnit.assert.equal(dir, undefined)
     })
-  })
+    QUnit.test('search_relative_from_root', function() {
+      var root = new DirectoryBuilder('/').setDirectories([
+        new DirectoryBuilder('home').setDirectories([
+          new DirectoryBuilder('projects').setFiles([ 'rflang.md' ]).build(),
+          new DirectoryBuilder('aboutme').setFiles([ 'rflang.md' ]).build(),
+          new DirectoryBuilder('empty').setDirectories([
+            new DirectoryBuilder('subempty').setFiles([ 'notemptysike.md' ]).build(),
+          ]).build()
+        ]).setFiles([]).build(),
+      ]).setFiles([]).build();
 
+      var dir = root.searchPath('home/projects/..')
+      var realpath = dir.realpath();
+      QUnit.assert.equal(realpath, '/home/')
+    })
+    QUnit.test('search_relative_from_root_passed_root', function() {
+      var root = new DirectoryBuilder('/').setDirectories([
+        new DirectoryBuilder('home').setDirectories([
+          new DirectoryBuilder('projects').setFiles([ 'rflang.md' ]).build(),
+          new DirectoryBuilder('aboutme').setFiles([ 'rflang.md' ]).build(),
+          new DirectoryBuilder('empty').setDirectories([
+            new DirectoryBuilder('subempty').setFiles([ 'notemptysike.md' ]).build(),
+          ]).build()
+        ]).setFiles([]).build(),
+      ]).setFiles([]).build();
+
+      var dir = root.searchPath('home/projects/../../..')
+      QUnit.assert.equal(dir, undefined);
+    })
+  });
   QUnit.module('realpath', function() {
     QUnit.test('root', function() {
       var dir = new DirectoryBuilder('/').build();
