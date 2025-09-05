@@ -1,12 +1,16 @@
 class FileSystem {
   constructor() {
-    this.root = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('projects').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('aboutme').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('empty').build()
-        ]).setFiles([ 'test.home' ]).build(),
-      ]).setFiles([]).build();
+    this.root = new DirectoryBuilder('/').setChildren([
+        new DirectoryBuilder('home').setChildren([
+          new DirectoryBuilder('projects').setChildren([ new File('rflang.md', 'fs/rflang.md') ]).build(),
+          new DirectoryBuilder('aboutme').setChildren([ new File('rflang.md', 'fs/rflang.md') ]).build(),
+          new DirectoryBuilder('empty').build(),
+          new File('test.home', 'fs/test.home')
+        ]).build(),
+      ]).build();
+
+    var file = this.getRoot().searchPath('home/projects/rflang.md')
+    console.log(file)
   }
 
   getRoot() {

@@ -2,49 +2,59 @@ QUnit.module('filesystem', function() {
   QUnit.module('directory', function() {
     QUnit.test('directory_empty', function() {
       var dir = new DirectoryBuilder('/').build()
+      QUnit.assert.true(dir instanceof Directory, 'ensure that dir is a Directory instance');
       QUnit.assert.equal(dir.name, '/', 'ensure that name is set');
-      QUnit.assert.deepEqual(dir.directories, [], 'ensure that directories is empty');
-      QUnit.assert.deepEqual(dir.files, [], 'ensure that files is empty');
+      console.log(dir)
+      QUnit.assert.deepEqual(dir.children, [], 'ensure that children is empty');
     });
     QUnit.test('directory_w_files_wo_directories', function() {
-      var dir = new DirectoryBuilder('/').setFiles(['test.txt', 'cool.md']).build()
+      var dir = new DirectoryBuilder('/').setChildren([
+        new File('test.txt', 'path'),
+        new File('cool.md', 'path')
+      ]).build()
       QUnit.assert.equal(dir.name, '/', 'ensure that name is set');
-      QUnit.assert.deepEqual(dir.directories, [], 'ensure that directories is empty');
-      QUnit.assert.deepEqual(dir.files, ['test.txt', 'cool.md'], 'ensure that files are set');
+      QUnit.assert.equal(dir.children.length, 2, 'ensure there are two children');
+      QUnit.assert.equal(dir.getFiles().length, 2, 'ensure there are two files');
+
+      const files = dir.getFiles()
+      QUnit.assert.equal(files.length, 2, 'ensure there are two files')
+      const filenames = files.map(file => file.name)
+      const realpaths = files.map(file => file.realpath)
+      QUnit.assert.deepEqual(filenames, ['test.txt', 'cool.md'])
+      QUnit.assert.deepEqual(realpaths, ['path', 'path'])
     })
+
     QUnit.test('directory_wo_files_w_single_sub_directory', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
         new DirectoryBuilder('home').build()
       ]).build()
       QUnit.assert.equal(dir.name, '/', 'ensure that name is set');
-      QUnit.assert.equal(dir.directories.length, 1, 'ensure that directories has a single entry');
-      QUnit.assert.equal(dir.directories[0].name, 'home', 'ensure that the directory entry name is correct');
-      QUnit.assert.deepEqual(dir.directories[0].directories, [], 'ensure that the directory entry has no directories itself');
-      QUnit.assert.deepEqual(dir.directories[0].files, [], 'ensure that the directory entry has no files itself');
-      QUnit.assert.equal(dir.directories[0].parent, dir, 'ensure that the parent attribute is set correctly');
-      QUnit.assert.deepEqual(dir.files, [], 'ensure that files empty');
+      QUnit.assert.equal(dir.children.length, 1, 'ensure that directories has a single entry');
+      QUnit.assert.equal(dir.children[0].name, 'home', 'ensure that the directory entry name is correct');
+      QUnit.assert.deepEqual(dir.children[0].children, [], 'ensure that the directory entry has no children itself');
+      QUnit.assert.equal(dir.children[0].parent, dir, 'ensure that the parent attribute is set correctly');
     })
     QUnit.test('directory_wo_files_w_muliple_sub_directories', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
         new DirectoryBuilder('home').build(),
         new DirectoryBuilder('projects').build()
-      ]).setFiles([]).build()
+      ]).build()
       QUnit.assert.equal(dir.name, '/', 'ensure that name is set');
-      QUnit.assert.deepEqual(dir.files, [], 'ensure that files empty');
-      QUnit.assert.equal(dir.directories.length, 2, 'ensure that directories has a single entry');
+      QUnit.assert.deepEqual(dir.getFiles(), [], 'ensure that files empty');
+      QUnit.assert.equal(dir.getDirectories().length, 2, 'ensure that root has a two sub directories');
 
-      QUnit.assert.equal(dir.directories[0].name, 'home', 'ensure that the directory entry name is correct');
-      QUnit.assert.equal(dir.directories[0].parent, dir, 'ensure that the parent attribute is set correctly');
-      QUnit.assert.deepEqual(dir.directories[0].directories, [], 'ensure that the directory entry has no directories itself');
-      QUnit.assert.deepEqual(dir.directories[0].files, [], 'ensure that the directory entry has no files itself');
+      QUnit.assert.equal(dir.getDirectories()[0].name, 'home', 'ensure that the directory entry name is correct');
+      QUnit.assert.equal(dir.getDirectories()[0].parent, dir, 'ensure that the parent attribute is set correctly');
+      QUnit.assert.deepEqual(dir.getDirectories()[0].getDirectories(), [], 'ensure that the directory entry has no directories itself');
+      QUnit.assert.deepEqual(dir.getDirectories()[0].getFiles(), [], 'ensure that the directory entry has no files itself');
 
-      QUnit.assert.equal(dir.directories[1].name, 'projects', 'ensure that the directory entry name is correct');
-      QUnit.assert.equal(dir.directories[1].parent, dir, 'ensure that the parent attribute is set correctly');
-      QUnit.assert.deepEqual(dir.directories[1].directories, [], 'ensure that the directory entry has no directories itself');
-      QUnit.assert.deepEqual(dir.directories[1].files, [], 'ensure that the directory entry has no files itself');
+      QUnit.assert.equal(dir.getDirectories()[1].name, 'projects', 'ensure that the directory entry name is correct');
+      QUnit.assert.equal(dir.getDirectories()[1].parent, dir, 'ensure that the parent attribute is set correctly');
+      QUnit.assert.deepEqual(dir.children[1].getDirectories(), [], 'ensure that the directory entry has no directories itself');
+      QUnit.assert.deepEqual(dir.children[1].getFiles(), [], 'ensure that the directory entry has no files itself');
     })
   });
-  QUnit.module('search', function() {
+  QUnit.module('searchdir', function() {
     QUnit.test('root', function() {
       var dir = new DirectoryBuilder('/').build();
       var found = dir.searchDir('/')
@@ -52,7 +62,7 @@ QUnit.module('filesystem', function() {
     })
 
     QUnit.test('one_level_down', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
         new DirectoryBuilder('home').build()
       ]).build()
 
@@ -61,8 +71,8 @@ QUnit.module('filesystem', function() {
     })
 
     QUnit.test('two_levels_down', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
+        new DirectoryBuilder('home').setChildren([
           new DirectoryBuilder('projects').build()
         ]).build()
       ]).build()
@@ -72,8 +82,8 @@ QUnit.module('filesystem', function() {
     })
 
     QUnit.test('nonexistant_folder', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
+        new DirectoryBuilder('home').setChildren([
           new DirectoryBuilder('projects').build()
         ]).build()
       ]).build()
@@ -83,11 +93,11 @@ QUnit.module('filesystem', function() {
     })
 
     QUnit.test('deep_search_dir', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('1').setDirectories([
-            new DirectoryBuilder('2').setDirectories([
-              new DirectoryBuilder('3').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
+        new DirectoryBuilder('home').setChildren([
+          new DirectoryBuilder('1').setChildren([
+            new DirectoryBuilder('2').setChildren([
+              new DirectoryBuilder('3').setChildren([
                 new DirectoryBuilder('projects').build()
               ]).build()
             ]).build()
@@ -100,11 +110,11 @@ QUnit.module('filesystem', function() {
     })
 
     QUnit.test('deep_search_dir_w_parallel_dirs_and_files', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('1').setDirectories([
-            new DirectoryBuilder('2').setDirectories([
-              new DirectoryBuilder('3').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
+        new DirectoryBuilder('home').setChildren([
+          new DirectoryBuilder('1').setChildren([
+            new DirectoryBuilder('2').setChildren([
+              new DirectoryBuilder('3').setChildren([
                 new DirectoryBuilder('projects').build(),
                 new DirectoryBuilder('about').build()
               ]).build(),
@@ -122,78 +132,129 @@ QUnit.module('filesystem', function() {
     })
   });
   QUnit.module('searchpath', function() {
-    QUnit.test('compound_path_exists', function() {
-      var root = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('projects').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('aboutme').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('empty').setDirectories([
-            new DirectoryBuilder('subempty').setFiles([ 'notemptysike.md' ]).build(),
-          ]).build()
-        ]).setFiles([]).build(),
-      ]).setFiles([]).build();
+    QUnit.module('directory', function() {
+      QUnit.test('compound_path_exists', function() {
+        var root = new DirectoryBuilder('/').setChildren([
+          new DirectoryBuilder('home').setChildren([
+            new DirectoryBuilder('projects').setChildren(new File('rflang.md', '')).build(),
+            new DirectoryBuilder('aboutme').setChildren(new File('rflang.md', '')).build(),
+            new DirectoryBuilder('empty').setChildren([
+              new DirectoryBuilder('subempty').setChildren([new File('notemptysike.md', '')]).build(),
+            ]).build()
+          ]).build(),
+        ]).build();
 
-      var dir = root.searchPath('home/empty/subempty')
-      QUnit.assert.equal(dir.name, 'subempty')
-      QUnit.assert.deepEqual(dir.directories, [])
-      QUnit.assert.deepEqual(dir.files, ['notemptysike.md'])
-    });
-    QUnit.test('compound_path_not_exists', function() {
-      var root = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('projects').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('aboutme').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('empty').setDirectories([
-            new DirectoryBuilder('subempty').setFiles([ 'notemptysike.md' ]).build(),
-          ]).build()
-        ]).setFiles([]).build(),
-      ]).setFiles([]).build();
+        var dir = root.searchPath('home/empty/subempty')
+        QUnit.assert.equal(dir.name, 'subempty', 'check name of returned dir')
+        QUnit.assert.deepEqual(dir.getDirectories(), [])
 
-      var dir = root.searchPath('home/empty/subempt')
-      QUnit.assert.equal(dir, undefined)
+        const files = dir.getFiles()
+        QUnit.assert.equal(files.length, 1, 'ensure there is one file')
+
+        const filenames = files.map(file => file.name)
+        const realpaths = files.map(file => file.realpath)
+        QUnit.assert.deepEqual(filenames, ['notemptysike.md'])
+        QUnit.assert.deepEqual(realpaths, [''])
+      });
+      QUnit.test('compound_path_not_exists', function() {
+        var root = new DirectoryBuilder('/').setChildren([
+          new DirectoryBuilder('home').setChildren([
+            new DirectoryBuilder('projects').setChildren([ new File('rflang.md', '') ]).build(),
+            new DirectoryBuilder('aboutme').setChildren([ new File('rflang.md', '') ]).build(),
+            new DirectoryBuilder('empty').setChildren([
+              new DirectoryBuilder('subempty').setChildren([new File('notemptysike.md', '')]).build(),
+            ]).build()
+          ]).build(),
+        ]).build();
+
+        var dir = root.searchPath('home/empty/subempt')
+        QUnit.assert.equal(dir, undefined)
+      })
+      QUnit.test('search_for_distance_child_dir', function() {
+        var root = new DirectoryBuilder('/').setChildren([
+          new DirectoryBuilder('home').setChildren([
+            new DirectoryBuilder('projects').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('aboutme').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('empty').setChildren([
+              new DirectoryBuilder('subempty').setChildren([new File('notemptysike.md', '')]).build(),
+            ]).build()
+          ]).build(),
+        ]).build();
+        
+        var dir = root.searchPath('subempty')
+        QUnit.assert.equal(dir, undefined)
+      })
+      QUnit.test('search_relative_from_root', function() {
+        var root = new DirectoryBuilder('/').setChildren([
+          new DirectoryBuilder('home').setChildren([
+            new DirectoryBuilder('projects').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('aboutme').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('empty').setChildren([
+              new DirectoryBuilder('subempty').setChildren([new File('notemptysike.md', '')]).build(),
+            ]).build()
+          ]).build(),
+        ]).build();
+
+        var dir = root.searchPath('home/projects/..')
+        var realpath = dir.realpath();
+        QUnit.assert.equal(realpath, '/home/')
+      })
+      QUnit.test('search_relative_from_root_passed_root', function() {
+        var root = new DirectoryBuilder('/').setChildren([
+          new DirectoryBuilder('home').setChildren([
+            new DirectoryBuilder('projects').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('aboutme').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('empty').setChildren([
+              new DirectoryBuilder('subempty').setChildren([new File('notemptysike.md', '')]).build(),
+            ]).build()
+          ]).build(),
+        ]).build();
+
+        var dir = root.searchPath('home/projects/../../..')
+        QUnit.assert.equal(dir, undefined);
+      })
     })
-    QUnit.test('search_for_distance_child_dir', function() {
-      var root = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('projects').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('aboutme').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('empty').setDirectories([
-            new DirectoryBuilder('subempty').setFiles([ 'notemptysike.md' ]).build(),
-          ]).build()
-        ]).setFiles([]).build(),
-      ]).setFiles([]).build();
-      
-      var dir = root.searchPath('subempty')
-      QUnit.assert.equal(dir, undefined)
-    })
-    QUnit.test('search_relative_from_root', function() {
-      var root = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('projects').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('aboutme').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('empty').setDirectories([
-            new DirectoryBuilder('subempty').setFiles([ 'notemptysike.md' ]).build(),
-          ]).build()
-        ]).setFiles([]).build(),
-      ]).setFiles([]).build();
+    QUnit.module('file', function() {
+      QUnit.test('search_file_in_root', function() {
+        var root = new DirectoryBuilder('/').setChildren([
+          new File('easter_egg', ''),
+          new DirectoryBuilder('home').setChildren([
+            new DirectoryBuilder('projects').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('aboutme').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('empty').setChildren([
+              new DirectoryBuilder('subempty').setChildren([new File('notemptysike.md', '')]).build(),
+            ]).build()
+          ]).build(),
+        ]).build();
 
-      var dir = root.searchPath('home/projects/..')
-      var realpath = dir.realpath();
-      QUnit.assert.equal(realpath, '/home/')
-    })
-    QUnit.test('search_relative_from_root_passed_root', function() {
-      var root = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('projects').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('aboutme').setFiles([ 'rflang.md' ]).build(),
-          new DirectoryBuilder('empty').setDirectories([
-            new DirectoryBuilder('subempty').setFiles([ 'notemptysike.md' ]).build(),
-          ]).build()
-        ]).setFiles([]).build(),
-      ]).setFiles([]).build();
+        var f = root.searchPath('easter_egg', true)
+        QUnit.assert.notEqual(f, undefined, 'search for file in root')
+        QUnit.assert.equal(f.name, 'easter_egg', 'check if file is correct file')
+      })
+      QUnit.test('search_file_in_deep_path', function() {
+        var root = new DirectoryBuilder('/').setChildren([
+          new File('easter_egg', ''),
+          new DirectoryBuilder('home').setChildren([
+            new DirectoryBuilder('projects').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('aboutme').setChildren([new File('rflang.md', '')]).build(),
+            new DirectoryBuilder('empty').setChildren([
+              new DirectoryBuilder('subempty').setChildren([new File('notemptysike.md', '')]).build(),
+            ]).build()
+          ]).build(),
+        ]).build();
 
-      var dir = root.searchPath('home/projects/../../..')
-      QUnit.assert.equal(dir, undefined);
+        var f = root.searchPath('home/projects/rflang.md', true)
+        QUnit.assert.notEqual(f, undefined, 'search for home/projects/rflang.md')
+        QUnit.assert.equal(f.name, 'rflang.md', 'check if file is correct file')
+
+        var f = root.searchPath('home/aboutme/rflang.md', true)
+        QUnit.assert.notEqual(f, undefined, 'search for home/aboutme/rflang.md')
+        QUnit.assert.equal(f.name, 'rflang.md', 'check if file is correct file')
+
+        var f = root.searchPath('home/empty/subempty/notemptysike.md', true)
+        QUnit.assert.notEqual(f, undefined, 'search for home/empty/subempty/notemptysike.md')
+        QUnit.assert.equal(f.name, 'notemptysike.md', 'check if file is correct file')
+      })
     })
   });
   QUnit.module('realpath', function() {
@@ -205,11 +266,11 @@ QUnit.module('filesystem', function() {
     })
 
     QUnit.test('deep_realpath', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('1').setDirectories([
-            new DirectoryBuilder('2').setDirectories([
-              new DirectoryBuilder('3').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
+        new DirectoryBuilder('home').setChildren([
+          new DirectoryBuilder('1').setChildren([
+            new DirectoryBuilder('2').setChildren([
+              new DirectoryBuilder('3').setChildren([
                 new DirectoryBuilder('projects').build(),
                 new DirectoryBuilder('about').build()
               ]).build(),
@@ -228,11 +289,11 @@ QUnit.module('filesystem', function() {
     })
 
     QUnit.test('deep_realpath2', function() {
-      var dir = new DirectoryBuilder('/').setDirectories([
-        new DirectoryBuilder('home').setDirectories([
-          new DirectoryBuilder('1').setDirectories([
-            new DirectoryBuilder('2').setDirectories([
-              new DirectoryBuilder('3').setDirectories([
+      var dir = new DirectoryBuilder('/').setChildren([
+        new DirectoryBuilder('home').setChildren([
+          new DirectoryBuilder('1').setChildren([
+            new DirectoryBuilder('2').setChildren([
+              new DirectoryBuilder('3').setChildren([
                 new DirectoryBuilder('projects').build(),
                 new DirectoryBuilder('about').build()
               ]).build(),
