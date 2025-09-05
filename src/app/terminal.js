@@ -3,34 +3,12 @@ class Terminal {
     this.input = "";
     this.fs = new FileSystem();
     this.cwd = this.fs.getRoot();
+
+    this.ls = new LsCommand(this.fs, this)
+    this.cd = new CdCommand(this.fs, this)
     this.commandMap = {
-      'ls': (args) => {
-        var dir = undefined;
-        if (args.length == 1) dir = this.cwd;
-        else if (args[1] === '/') dir = this.fs.getRoot();
-        else if (args[1][0] === '/') dir = this.fs.getRoot().searchPath(args[1].slice(1));
-        else dir = this.fs.getRoot().searchPath(args[1]);
-        if (dir) {
-          for (let i = 0; i < dir.directories.length; i++) console.log(` Directory -  ${dir.directories[i].name}`)
-          for (let i = 0; i < dir.files.length; i++) console.log(` File      -  ${dir.files[i]}`)
-        }
-        else {
-          console.error(`directory ${args[1]} does not exist`);
-        }
-      },
-      'cd': (args) => {
-        var dir = undefined;
-        if (args.length == 1) dir = this.cwd;
-        else if (args[1] === '/') dir = this.fs.getRoot();
-        else if (args[1][0] === '/') dir = this.fs.getRoot().searchPath(args[1].slice(1));
-        else dir = this.cwd.searchPath(args[1]);
-        if (dir) {
-          this.cwd = dir;
-        }
-        else {
-          console.error(`directory ${args[1]} does not exist`);
-        }
-      }
+      'ls': (args) => { return this.ls.run(args) },
+      'cd': (args) => { return this.cd.run(args) },
     };
   }
 
@@ -44,13 +22,16 @@ class Terminal {
 
   submitInput() {
     const args = this.input.split(" ").filter(s => s.length != 0);
-    console.log(args);
-    if (args[0] in this.commandMap) {
-      this.commandMap[args[0]](args)
+    this.input = "";
+    if (args.length == 0) {
+      return CommandResult.NoInput(this.cwd, args);
+    }
+    else if (args[0] in this.commandMap) {
+      return this.commandMap[args[0]](args)
     }
     else {
-      console.log(`command '${args[0]}' not found`);
+      console.log('invalid command')
+      return CommandResult.CommandNotFound(args[0], this.cwd, args);
     }
-    this.input = "";
   }
 }
