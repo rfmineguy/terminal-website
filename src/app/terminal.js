@@ -19,6 +19,17 @@ class Terminal {
         }
       },
       'cd': (args) => {
+        var dir = undefined;
+        if (args.length == 1) dir = this.cwd;
+        else if (args[1] === '/') dir = this.fs.getRoot();
+        else if (args[1][0] === '/') dir = this.fs.getRoot().searchPath(args[1].slice(1));
+        else dir = this.cwd.searchPath(args[1]);
+        if (dir) {
+          this.cwd = dir;
+        }
+        else {
+          console.error(`directory ${args[1]} does not exist`);
+        }
       }
     };
   }
