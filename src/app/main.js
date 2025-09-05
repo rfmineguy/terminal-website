@@ -3,6 +3,7 @@ let ignoreEvents = ['Shift', 'Meta', 'Alt', 'Control', 'Escape', 'Tab', 'Caps Lo
 
 const prompt = document.getElementById('prompt')
 const termOutput = document.getElementById('term-output')
+const termArea = document.getElementsByClassName('term-area')[0]
 
 const updateline = (ch) => {
   const input = document.getElementById('term-input-text')
@@ -23,6 +24,7 @@ const handlekey = (event) => {
     console.log('cmd result', result)
     const dom = result.createDOM()
     termOutput.appendChild(dom)
+    termArea.scrollTop = termArea.scrollHeight;
   }
   else term.addCharToInput(event.key);
 
