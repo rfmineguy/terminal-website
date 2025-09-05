@@ -28,6 +28,7 @@ body {
 
 .term-area {
   height: 100%;
+  color: white;
   .term-input {
     height: 25px;
     width: 100%;

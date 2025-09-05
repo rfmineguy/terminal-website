@@ -2,6 +2,7 @@ let term = new Terminal();
 let ignoreEvents = ['Shift', 'Meta', 'Alt', 'Control', 'Escape', 'Tab', 'Caps Lock']
 
 const prompt = document.getElementById('prompt')
+const termOutput = document.getElementById('term-output')
 
 const updateline = (ch) => {
   const input = document.getElementById('term-input-text')
@@ -17,7 +18,12 @@ const handlekey = (event) => {
     event.preventDefault();
 
   if (event.key === 'Backspace') term.deleteCharFromInput();
-  else if (event.key === 'Enter') term.submitInput();
+  else if (event.key === 'Enter') {
+    const result = term.submitInput();
+    console.log('cmd result', result)
+    const dom = result.createDOM()
+    termOutput.appendChild(dom)
+  }
   else term.addCharToInput(event.key);
 
   updateline(term.input);
