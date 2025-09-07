@@ -4,7 +4,6 @@ class LsProgram extends Program {
   }
 
   main(args) {
-    console.log(args)
     var dir = undefined
     if (args.length == 1) dir = this.parent_shell.cwd
     else if (args[1] === '/') dir = this.parent_shell.fs.getRoot();
