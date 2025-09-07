@@ -22,6 +22,14 @@ class Terminal {
     return this.shell.terminal_keyevent(ch)
   }
 
+  createDomLine(text) {
+    const div = document.createElement('div')
+    const p = document.createElement('p')
+    p.innerText = text
+    div.appendChild(p)
+    return div
+  }
+
 
     }
   }
