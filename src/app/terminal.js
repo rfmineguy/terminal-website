@@ -18,21 +18,8 @@ class Terminal {
     this.input += ch;
   }
 
-  submitInput() {
-    const args = this.input.split(" ").filter(s => s.length != 0);
-    this.commandHistory.unshift(this.input)
-    this.commandHistoryIndex = -1
-    this.input = "";
-    if (args.length == 0) {
-      return CommandResult.NoInput(this.cwd, args);
-    }
-    else if (args[0] in this.commandMap) {
-      return this.commandMap[args[0]](args)
-    }
-    else {
-      console.log('invalid command')
-      return CommandResult.CommandNotFound(args[0], this.cwd, args);
-    }
+  forwardKey(ch) {
+    return this.shell.terminal_keyevent(ch)
   }
 
   navigateHistory(direction) {
