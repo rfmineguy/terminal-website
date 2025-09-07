@@ -52,5 +52,17 @@ class Shell {
   }
 
   navigateHistory(direction) {
+    this.commandHistoryIndex += direction
+    if (this.commandHistoryIndex <= -1)
+      this.commandHistoryIndex = -1
+    if (this.commandHistoryIndex >= this.commandHistory.length)
+      this.commandHistoryIndex = this.commandHistory.length - 1
+
+    if (this.commandHistoryIndex == -1) {
+      this.buf = ''
+    }
+    else {
+      this.buf = this.commandHistory[this.commandHistoryIndex];
+    }
   }
 }
