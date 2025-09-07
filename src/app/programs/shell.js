@@ -18,6 +18,7 @@ class Shell {
   }
 
   write_cmdline() {
+    this.parent_terminal.writePrompt(`${this.cwd.realpath()} $ ${this.buf}`)
   }
 
   terminal_keyevent(key) {
