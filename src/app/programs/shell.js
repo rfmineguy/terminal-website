@@ -11,7 +11,8 @@ class Shell {
       'ls': new LsProgram(this),
       'cd': new CdProgram(this),
       'clear': new ClearProgram(this),
-      'cat': new CatProgram(this)
+      'cat': new CatProgram(this),
+      'tree': new TreeProgram(this),
     };
     this.commandHistory = []
     this.commandHistoryIndex = -1

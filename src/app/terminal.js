@@ -25,13 +25,14 @@ class Terminal {
   createDomLine(text) {
     const div = document.createElement('div')
     const p = document.createElement('p')
-    p.innerText = text
+    p.classList.add('enable-whitespace')
+    p.textContent = text
     div.appendChild(p)
     return div
   }
 
   writePrompt(text) {
-    this.prompt_node.innerText = text
+    this.prompt_node.textContent = text
   }
 
   write(text) {
@@ -43,7 +44,6 @@ class Terminal {
         if (line[i] == '\r') this.line = ""
         else if (line.slice(i).startsWith('\\033')) {
           // process escape code
-          console.log('substr', line.slice(i).startsWith('\\033'))
           this.output_dom_node.replaceChildren();
           break
         }
