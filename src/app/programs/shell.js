@@ -21,6 +21,30 @@ class Shell {
   }
 
   terminal_keyevent(key) {
+    if (ignoreEvents.includes(key)) return true
+    if (key === 'Enter') {
+      this.submitInput()
+      this.buf = ""
+      this.write_cmdline()
+      return true
+    }
+    else if (key === 'ArrowUp') {
+      this.navigateHistory(1)
+      this.write_cmdline()
+    }
+    else if (key === 'ArrowDown') {
+      this.navigateHistory(-1)
+      this.write_cmdline()
+    }
+    else if (key === 'Backspace') {
+      this.buf = this.buf.slice(0, -1)
+      this.write_cmdline()
+    }
+    else {
+      this.buf += key
+      this.write_cmdline()
+    }
+    return false
   }
 
   submitInput() {
