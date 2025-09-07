@@ -22,18 +22,7 @@ class Terminal {
     return this.shell.terminal_keyevent(ch)
   }
 
-  navigateHistory(direction) {
-    this.commandHistoryIndex += direction
-    if (this.commandHistoryIndex <= -1)
-      this.commandHistoryIndex = -1
-    if (this.commandHistoryIndex >= this.commandHistory.length)
-      this.commandHistoryIndex = this.commandHistory.length - 1
 
-    if (this.commandHistoryIndex == -1) {
-      this.input = ''
-    }
-    else {
-      this.input = this.commandHistory[this.commandHistoryIndex];
     }
   }
 }
