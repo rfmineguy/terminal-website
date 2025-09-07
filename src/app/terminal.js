@@ -31,7 +31,6 @@ class Terminal {
   }
 
   writePrompt(text) {
-    console.log(text)
     this.prompt_node.innerText = text
   }
 
