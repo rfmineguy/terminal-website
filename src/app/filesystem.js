@@ -20,6 +20,10 @@ class FileSystem {
     return this.root;
   }
 
+  getHome() {
+    return this.getRoot().searchPath('home')
+  }
+
   getFiles(dir) {
     if (!(dir in this.filesystem)) console.log(`${dir} not in filesystem`)
     return this.filesystem[dir].entries;

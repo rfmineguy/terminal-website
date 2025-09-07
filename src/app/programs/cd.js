@@ -5,7 +5,7 @@ class CdProgram extends Program {
 
   main(args) {
     var dir = undefined
-    if (args.length == 1) dir = this.parent_shell.cwd
+    if (args.length == 1) dir = this.parent_shell.fs.getHome()
     else if (args[1] === '/') dir = this.parent_shell.fs.getRoot()
     else if (args[1][0] === '/') dir = this.parent_shell.fs.getRoot().searchPath(args[1].slice(1))
     else dir = this.parent_shell.cwd.searchPath(args[1])
