@@ -1,19 +1,13 @@
 class Terminal {
-  constructor() {
-    this.input = "";
+  constructor(prompt_node, output_dom_node, term_area_dom_node) {
+    this.line = "";
+    this.prompt_node = prompt_node
+    this.output_dom_node = output_dom_node;
+    this.term_area_dom_node = term_area_dom_node;
     this.fs = new FileSystem();
     this.cwd = this.fs.getRoot();
-    this.commandHistory = []
-    this.commandHistoryIndex = -1
 
-    this.ls = new LsCommand(this.fs, this)
-    this.cd = new CdCommand(this.fs, this)
-    this.clear = new ClearCommand(this.fs, this)
-    this.commandMap = {
-      'ls':    (args) => { return this.ls.run(args) },
-      'cd':    (args) => { return this.cd.run(args) },
-      'clear': (args) => { return this.clear.run(args) },
-    };
+    this.shell = new Shell(this)
   }
 
   deleteCharFromInput() {
