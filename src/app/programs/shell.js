@@ -59,15 +59,11 @@ class Shell {
       return -1
     }
     else if (args[0] in this.programs) {
-      console.log(`run program ${args[0]}`)
       var returncode = this.programs[args[0]].main(args)
-
-      console.log(`code: ${returncode}`)
       return returncode
     }
     else {
-      console.log('invalid command')
-      this.parent_terminal.write('invalid command')
+      this.parent_terminal.write(`command not found: ${args[0]}`)
       return -1
     }
   }
