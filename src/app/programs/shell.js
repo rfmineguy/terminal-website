@@ -49,6 +49,26 @@ class Shell {
   }
 
   submitInput() {
+    this.parent_terminal.write('\n')
+    const args = this.buf.split(" ").filter(s => s.length != 0);
+    this.commandHistory.unshift(this.buf)
+    this.commandHistoryIndex = -1
+    this.parent_terminal.write(`${this.cwd.realpath()} $ ${this.buf}`)
+    if (args.length == 0) {
+      return -1
+    }
+    else if (args[0] in this.programs) {
+      console.log(`run program ${args[0]}`)
+      var returncode = this.programs[args[0]].main(args)
+
+      console.log(`code: ${returncode}`)
+      return returncode
+    }
+    else {
+      console.log('invalid command')
+      this.parent_terminal.write('invalid command')
+      return -1
+    }
   }
 
   navigateHistory(direction) {
