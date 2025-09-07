@@ -6,5 +6,10 @@ class File extends AbstractFSNode {
   constructor(name, realpath) {
     super(name)
     this.realpath = realpath
+    this.contents = ''
+  }
+
+  write(data) {
+    this.contents += data
   }
 }

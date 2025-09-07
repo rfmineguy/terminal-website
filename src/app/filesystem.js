@@ -9,8 +9,11 @@ class FileSystem {
         ]).build(),
       ]).build();
 
-    var file = this.getRoot().searchPath('home/projects/rflang.md')
-    console.log(file)
+    let rflang = this.root.searchPath('home/projects/rflang.md')
+    rflang.write(`RFLang is a project that implements a compiler\n`)
+    rflang.write(`RFLang is a project that implements a compiler\n`)
+
+    console.log(this.root.searchPath('home/projects/rflang.md'))
   }
 
   getRoot() {
